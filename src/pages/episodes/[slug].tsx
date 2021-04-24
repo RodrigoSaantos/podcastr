@@ -6,6 +6,7 @@ import { api } from '../../services/api';
 import { convertDurationToTimeString } from '../../utils/convertDurationToTimeString';
 import styles from './episode.module.scss';
 import Link from 'next/link';
+import { usePlayer } from '../../contexts/PlayerContext';
 
 type Episode = {
   id: string;
@@ -24,6 +25,7 @@ type EpisodeProps = {
 }
 
 export default function Episode({ episode }: EpisodeProps) {
+  const { play } = usePlayer();
 
   return (
     <div className={styles.episode}>
@@ -34,7 +36,7 @@ export default function Episode({ episode }: EpisodeProps) {
           </button>
         </Link>
         <Image width={700} height={160} src={episode.thumbnail} objectFit="cover" />
-        <button type="button">
+        <button type="button" onClick={() => play(episode)}>
           <img src="/play.svg" alt="Tocar episódio"/>
         </button>
       </div>
@@ -53,7 +55,7 @@ export default function Episode({ episode }: EpisodeProps) {
 } 
 
 export const getStaticPaths: GetStaticPaths = async () => {
-
+  
   const { data } = await api.get('episodes', { 
     params: { 
       _limit: 12,
