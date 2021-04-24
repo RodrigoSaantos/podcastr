@@ -1,11 +1,11 @@
 
 import Image from 'next/image';
-import { useEffect, useRef, useState } from 'react';
-import { usePlayer } from '../../contexts/PlayerContext';
-import styles from './styles.module.scss';
 import Slider from 'rc-slider';
 import 'rc-slider/assets/index.css';
+import { useEffect, useRef, useState } from 'react';
+import { usePlayer } from '../../contexts/PlayerContext';
 import { convertDurationToTimeString } from '../../utils/convertDurationToTimeString';
+import styles from './styles.module.scss';
 
 export function Player() {
   const audioRef = useRef<HTMLAudioElement>(null);
@@ -23,6 +23,7 @@ export function Player() {
     setPlayingState,
     playNext,
     playPrevious,
+    clearPlayState,
     hasNext,
     hasPrevious,
   } = usePlayer();
@@ -46,6 +47,19 @@ export function Player() {
       setProgress(Math.floor(audioRef.current.currentTime))
     });
   };
+
+  function handleSeek(amount: number) {
+    audioRef.current.currentTime = amount;
+    setProgress(amount);
+  }
+
+  function handleEpisodesEnd() {
+    if (hasNext) {
+      playNext();
+    } else {
+      clearPlayState();
+    }
+  }
 
   const episode = episodeList[currentEpisodeIndex];
   return (
@@ -75,6 +89,7 @@ export function Player() {
               <Slider 
                 max={episode.duration}
                 value={progress}
+                onChange={handleSeek}
                 trackStyle={ {backgroundColor: '#04d361'}}
                 railStyle={ {backgroundColor: '#9f75ff'}}
                 handleStyle={ {borderColor: '#04d361', borderWidth: 4}}
@@ -93,6 +108,7 @@ export function Player() {
             loop={isLooping}
             autoPlay
             onPlay={() => setPlayingState(true)}
+            onEnded={handleEpisodesEnd}
             onPause={() => setPlayingState(false)}
             onLoadedMetadata={setupProgressListener}
           />
